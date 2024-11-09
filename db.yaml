@@ -5,7 +5,7 @@
    login_host: db.rskothapalli.site # we don 't creae this variable until we reach script to login-host.
   vars_prompt:
   - name: mysql_root_password
-    prompt: pleaes enter mysql root password
+    prompt: pleaes enter MYSQL root password
     private: no
 
   tasks:
