@@ -2,18 +2,18 @@
   hosts: db
   become: yes
   vars:
-   login_host: db.rskothapalli.site # we don't creae this variable until we reach script to login-host.
+   login_host: db.rskothapalli.site # we don 't creae this variable until we reach script to login-host.
   tasks:
     - name: Install mysql server
       ansible.builtin.dnf:
         name: mysql-server
         state: latest
     - name: start and enable mysql server
-      ansible.builtin.dnf:
+      ansible.builtin.service:
         name: mysqld
         state: started
         enabled: yes
-     # check if password is already set up
+     # check if password is already set up or not. 
     - name: check db connection
       community.mysql.mysql_info:
         login_user: root
