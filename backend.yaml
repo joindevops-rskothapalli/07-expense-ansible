@@ -1,6 +1,9 @@
 - name: configure back end server
   hosts: backend
   become: yes
+  vars: 
+    login_host: db.rskothapalli.site
+    login_password: ExpenseApp@1
 
   tasks: 
   - name: disable default nodejs
@@ -9,10 +12,13 @@
   - name: enable nodejs:20
     ansible.builtin.command: dnf module enable nodejs:20 -y
 
-  - name: install nodejs
-    ansible.builtin.dnf:
-      name: nodejs
+  - name: install nodejs and mysql
+    ansible.builtin.dnf: #homogenious(works only for red had family)
+      name: "{{name}}"
       state: installed
+    loop: 
+      - nodejs
+      - mysql
   
   - name: create expense user
     ansible.builtin.user:
@@ -22,4 +28,50 @@
     ansible.builtin.file: 
       path: /app
       state: directory
-      
+
+  - name: download backend code
+    ansible.builtin.get_url: 
+      url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+      dest: /tmp/backend.zip
+
+  - name: unzip backend code
+    ansible.builtin.unarchive: 
+      src: /tmp/backend.zip # by default checks in ansible server and try to unzip to remove server.
+      dest: /app
+      remote_src: yes # we put this, to tell the ansible server thta the source is already on remote server.   
+
+  - name: install npm dependencies
+    ansible.builtin.command: npm install
+    args: 
+      chdir: /app
+
+  - name: copy backend service
+    ansible.built.copy: 
+      src: backend.service
+      dest: /etc/systemd/system/backend.service
+
+  - name: install python mysql dependencies
+    ansible.builtin.pip:
+      names: 
+      - PyMySQL # to connect mysql db from ansible
+      - cryptography
+      executable: pip3.9
+
+  - name: import data into mysql
+    community.mysql.mysql_db: 
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      login_host: "{{ login_host}}"
+      target: /app/schema/backend.sql
+      state: import
+      name: all
+
+  - name: daemon reload
+    ansible.builtin.systemd_service: 
+      daemon_reload: true
+  - name: start and enable backend service
+    ansible.builtin.service: 
+      name: backend
+      state: started
+      enabled: yes
+  
