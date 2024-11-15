@@ -1,6 +1,6 @@
-- name: configure back end server
-  hosts: backend
+- name: configure backend server
   become: yes
+  hosts: backend
   vars: 
     login_host: db.rskothapalli.site
     login_password: ExpenseApp@1
@@ -19,7 +19,7 @@
     loop: 
       - nodejs
       - mysql
-  
+
   - name: create expense user
     ansible.builtin.user:
       name: expense
@@ -60,7 +60,7 @@
   - name: import data into mysql
     community.mysql.mysql_db: 
       login_user: root
-      login_password: "{{ mysql_root_password }}"
+      login_password: "{{ login_password }}"
       login_host: "{{ login_host}}"
       target: /app/schema/backend.sql
       state: import
