@@ -28,7 +28,7 @@
     - name: check db connection
       community.mysql.mysql_info:
         login_user: root
-        login_password: ExpenseApp@1
+        login_password: "{{ mysql_root_password }}"
         login_host: "{{login_host}}"
         filter: version #it is used to check the version. 
       ignore_errors: yes
