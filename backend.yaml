@@ -14,7 +14,7 @@
 
   - name: install nodejs and mysql
     ansible.builtin.dnf: #homogenious(works only for red had family)
-      name: "{{name}}"
+      name: "{{ item }}"
       state: installed
     loop: 
       - nodejs
